@@ -79,7 +79,7 @@ docs &lt;- tm_map(docs, removeWords, stopwords(kind = "SMART"))</p>
 <p>docs &lt;- tm_map(docs, stripWhitespace)
 docs &lt;- tm_map(docs, removePunctuation)
 docs &lt;- tm_map(docs, PlainTextDocument)
-'''</p>
+-&gt; '''</p>
 
 <p>Following this code, the posts now look like the following</p>
 
@@ -88,11 +88,12 @@ docs &lt;- tm_map(docs, PlainTextDocument)
 <p>To find out what topics consumers talked about on social media, we went ahead and found the most frequent terms using 10,000 posts.</p>
 
 <p>The Corpus must first be turned into a Document-Term Matrix
-'''R
-dtm &lt;- DocumentTermMatrix(docs)
+'''R</p>
+
+<p>dtm &lt;- DocumentTermMatrix(docs)
 dtm = removeSparseTerms(dtm, 0.98) #removes words with very low frequency
 findFreqTerms(dtm,100) #finds words that occur at least 100x
-'''</p>
+-&gt; '''</p>
 
 <h3>
 <a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating pages manually</h3>
