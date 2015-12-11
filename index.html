@@ -22,29 +22,77 @@
       <h1>
 <a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction.</h1>
 
-<p>"Dialogues on social media can provide tremendous insight into the behaviors, desires, pains, and thoughts of consumers. We'd like your help in developing a repeatable process that identifies, classifies, and extracts the underlying drivers of consumer financial conversations and comments in social media data." - (<a href="https://www.mindsumo.com/contests/wells-fargo">https://www.mindsumo.com/contests/wells-fargo</a>)</p>
+<p>Introduction</p>
+
+<p>Throughout my Data 101 course I was introduced to the concepts and theories behind Data Science that make it such an interdisciplinary field. Using the R programming language and popular algorithms in Big Data I was able to explore real world data and gain practical experience as a Data Scientist. </p>
+
+<p>A recurring theme, or observation, when looking into Big Data is the idea that large data sets are difficult to make sense of (i.e: unstructured). The challenge is often to make sense of (structure) this data. </p>
+
+<p>Wells Fargo opened a competition that I participated in for my final project in my Data 101 course. </p>
 
 <h1>
 <a id="the-competition" class="anchor" href="#the-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Competition.</h1>
 
-<p><a href="https://d18qs7yq39787j.cloudfront.net/uploads/contestfile/93/8af8575b213c-2015%2BWells%2BFargo%2BCampus%2BAnalytic%2BChallenge%2BDataset.txt">Using these social media posts</a> - Provide an analytic report based on the following outline.</p>
+<p>The Competition</p>
 
-<p>Question #1: What financial topics* do consumers discuss on social media and what caused the consumers to post about this topic? </p>
+<p>“Dialogues on social media can provide tremendous insight into the behaviors, desires, pains, and thoughts of consumers. We'd like your help in developing a repeatable process that identifies, classifies, and extracts the underlying drivers of consumer financial conversations and comments in social media data.”</p>
 
-<p>Deliverable A - Describe your Approach and Methodology. Include a visual representation of your analytic process flow. 
-Deliverable B - Discuss the data and its relationship to social conversation drivers. 
-Deliverable C - Document your code and reference the analytic process flow-diagram from deliverable A. </p>
+<p>Using just <a href="https://d18qs7yq39787j.cloudfront.net/uploads/contestfile/93/8af8575b213c-2015%2BWells%2BFargo%2BCampus%2BAnalytic%2BChallenge%2BDataset.txt">this document</a>, a team of 3 others and myself were tasked with answering two questions: </p>
+
+<p>Question #1: What financial topics do consumers discuss on social media and what caused the consumers to post about this topic? </p>
 
 <p>Question #2: Are the topics and “substance” consistent across the industry or are they isolated to individual banks? </p>
 
-<p>Deliverable D - Create a list of topics and substance you found 
-Deliverable E - Create a narrative of insights supported by the quantitative results (should include graphs or charts) </p>
+<p>With these two questions in mind, we had our work cut out for us.</p>
 
 <h1>
 <a id="the-solution" class="anchor" href="#the-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Solution</h1>
 
-<p>We used lists of positive and negative words and matched those words to text in the social media posts. A sentiment score for each post was calculated by the number of positive words minus the negative words. Very positive and very negative posts were defined as the score being &gt;= 2 or &lt;= 2 respectively. Then a data frame was made from 1000 posts sampled from the entire data frame. This data frame was further divided this into data frames for posts mentioning each bank respectively. Also, we made a data frame for posts containing "name". Finally, we ran the sentiment analysis on these subsets and calculated their scores and made graphs.
-Additionally, from the sample database, we created five wordclouds, one for each bank and one for all four banks combined, demonstrating what conversations were taking in regards to the banks. </p>
+<p>Using the dataset, the first challenge – like in much of big data – was to structure or clean its contents. Un-cleaned, the social media posts looked like this:</p>
+
+<p>As you can see there are many of the same items that pop up post after post. Some of them being “twit_hndl”, “BankD”, “INTERNET”, “Name”, etc. </p>
+
+<p>Using a sample size of 10,000 posts, we stripped out words or topics (such as “twit_hndl”, “INTERNET”) that we believed would not lend any importance to subsequent analysis. </p>
+
+<p>In an effort to clean, the data frame of 10,000 posts must be made suitable for the text mining package and therefore it must be a Corpus(collection of text documents). Here is the code to convert Data Frame to Corpus and to clean Corpus of unnecessary meta data.
+'''R
+library(tm) 
+docs &lt;- Corpus(DataframeSource(as.data.frame(df[,6])))</p>
+
+<h1>
+<a id="remember-it-matters-the-order-in-which-tm_map-expressions-are-run" class="anchor" href="#remember-it-matters-the-order-in-which-tm_map-expressions-are-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>REMEMBER: IT MATTERS THE ORDER IN WHICH TM_MAP EXPRESSIONS ARE RUN</h1>
+
+<p>library(rJava)
+docs &lt;- tm_map(docs, content_transformer(tolower)) # convert to lowercase first
+myMeta &lt;- c("name","bank","banka","bankb","bankc", "bankd", "banke",
+            "internet","https", "twit_hndl", "twit_hndl_banka",
+            "twit_hndl_bankb","twit_hndl_bankc","twit_hndl_bankd", "phone",
+            "dirmsg", "street","name_resp","bankds", "and", "for", "the", "you",
+            "twithndlbanka","dirmsg","ret_twit")
+docs &lt;- tm_map(docs, removeWords, myMeta)
+docs &lt;- tm_map(docs, removeWords, stopwords('english'))
+docs &lt;- tm_map(docs, removeWords, stopwords(kind = "SMART"))</p>
+
+<h1>
+<a id="metadatarecurrent-words" class="anchor" href="#metadatarecurrent-words" aria-hidden="true"><span class="octicon octicon-link"></span></a>metaData/recurrent words</h1>
+
+<p>docs &lt;- tm_map(docs, stripWhitespace)
+docs &lt;- tm_map(docs, removePunctuation)
+docs &lt;- tm_map(docs, PlainTextDocument)
+'''</p>
+
+<p>Following this code, the posts now look like the following</p>
+
+<p>Now that the data has been cleaned, analysis can follow.</p>
+
+<p>To find out what topics consumers talked about on social media, we went ahead and found the most frequent terms using 10,000 posts.</p>
+
+<p>The Corpus must first be turned into a Document-Term Matrix
+'''R
+dtm &lt;- DocumentTermMatrix(docs)
+dtm = removeSparseTerms(dtm, 0.98) #removes words with very low frequency
+findFreqTerms(dtm,100) #finds words that occur at least 100x
+'''</p>
 
 <h3>
 <a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating pages manually</h3>
