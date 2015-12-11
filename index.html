@@ -54,32 +54,26 @@
 
 <p>Using a sample size of 10,000 posts, we stripped out words or topics (such as “twit_hndl”, “INTERNET”) that we believed would not lend any importance to subsequent analysis. </p>
 
-<p>In an effort to clean, the data frame of 10,000 posts must be made suitable for the text mining package and therefore it must be a Corpus(collection of text documents). Here is the code to convert Data Frame to Corpus and to clean Corpus of unnecessary meta data.
-'''R
-library(tm) 
-docs &lt;- Corpus(DataframeSource(as.data.frame(df[,6])))</p>
+<p>In an effort to clean, the data frame of 10,000 posts must be made suitable for the text mining package and therefore it must be a Corpus(collection of text documents). Here is the code to convert Data Frame to Corpus and to clean Corpus of unnecessary meta data.</p>
 
-<h1>
-<a id="remember-it-matters-the-order-in-which-tm_map-expressions-are-run" class="anchor" href="#remember-it-matters-the-order-in-which-tm_map-expressions-are-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>REMEMBER: IT MATTERS THE ORDER IN WHICH TM_MAP EXPRESSIONS ARE RUN</h1>
+<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">tm</span>) 
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> Corpus(DataframeSource(as.data.frame(<span class="pl-smi">df</span>[,<span class="pl-c1">6</span>])))
+<span class="pl-c">#REMEMBER: IT MATTERS THE ORDER IN WHICH TM_MAP EXPRESSIONS ARE RUN</span>
+library(<span class="pl-smi">rJava</span>)
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, content_transformer(<span class="pl-smi">tolower</span>)) <span class="pl-c"># convert to lowercase first</span>
+<span class="pl-smi">myMeta</span> <span class="pl-k">&lt;-</span> c(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bank<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>banka<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bankb<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bankc<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>bankd<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>banke<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>internet<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>https<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>twit_hndl<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>twit_hndl_banka<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankb<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankc<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankd<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>phone<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>dirmsg<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>street<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>name_resp<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bankds<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>and<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>for<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>the<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>you<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>twithndlbanka<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>dirmsg<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>ret_twit<span class="pl-pds">"</span></span>)
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, <span class="pl-smi">myMeta</span>)
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, stopwords(<span class="pl-s"><span class="pl-pds">'</span>english<span class="pl-pds">'</span></span>))
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, stopwords(<span class="pl-v">kind</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>SMART<span class="pl-pds">"</span></span>))
+<span class="pl-c">#metaData/recurrent words</span>
 
-<p>library(rJava)
-docs &lt;- tm_map(docs, content_transformer(tolower)) # convert to lowercase first
-myMeta &lt;- c("name","bank","banka","bankb","bankc", "bankd", "banke",
-            "internet","https", "twit_hndl", "twit_hndl_banka",
-            "twit_hndl_bankb","twit_hndl_bankc","twit_hndl_bankd", "phone",
-            "dirmsg", "street","name_resp","bankds", "and", "for", "the", "you",
-            "twithndlbanka","dirmsg","ret_twit")
-docs &lt;- tm_map(docs, removeWords, myMeta)
-docs &lt;- tm_map(docs, removeWords, stopwords('english'))
-docs &lt;- tm_map(docs, removeWords, stopwords(kind = "SMART"))</p>
-
-<h1>
-<a id="metadatarecurrent-words" class="anchor" href="#metadatarecurrent-words" aria-hidden="true"><span class="octicon octicon-link"></span></a>metaData/recurrent words</h1>
-
-<p>docs &lt;- tm_map(docs, stripWhitespace)
-docs &lt;- tm_map(docs, removePunctuation)
-docs &lt;- tm_map(docs, PlainTextDocument)
--&gt; '''</p>
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">stripWhitespace</span>)
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removePunctuation</span>)
+<span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">PlainTextDocument</span>)</pre></div>
 
 <p>Following this code, the posts now look like the following</p>
 
