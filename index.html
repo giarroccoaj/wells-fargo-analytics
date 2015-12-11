@@ -48,7 +48,8 @@
 <h1>
 <a id="the-solution" class="anchor" href="#the-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Solution</h1>
 
-<p>Using the dataset, the first challenge – like in much of big data – was to structure or clean its contents. Un-cleaned, the social media posts looked like this:</p>
+<p>Using the dataset, the first challenge – like in much of big data – was to structure or clean its contents. Un-cleaned, the social media posts looked like this:
+<img src="http://i.imgur.com/8hdjJ2H.png" alt=""></p>
 
 <p>As you can see there are many of the same items that pop up post after post. Some of them being “twit_hndl”, “BankD”, “INTERNET”, “Name”, etc. </p>
 
@@ -61,6 +62,7 @@
 <span class="pl-c">#REMEMBER: IT MATTERS THE ORDER IN WHICH TM_MAP EXPRESSIONS ARE RUN</span>
 library(<span class="pl-smi">rJava</span>)
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, content_transformer(<span class="pl-smi">tolower</span>)) <span class="pl-c"># convert to lowercase first</span>
+<span class="pl-c">#metaData/recurrent words</span>
 <span class="pl-smi">myMeta</span> <span class="pl-k">&lt;-</span> c(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bank<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>banka<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bankb<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>bankc<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>bankd<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>banke<span class="pl-pds">"</span></span>,
             <span class="pl-s"><span class="pl-pds">"</span>internet<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>https<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>twit_hndl<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>twit_hndl_banka<span class="pl-pds">"</span></span>,
             <span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankb<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankc<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>twit_hndl_bankd<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>phone<span class="pl-pds">"</span></span>,
@@ -69,13 +71,12 @@ library(<span class="pl-smi">rJava</span>)
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, <span class="pl-smi">myMeta</span>)
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, stopwords(<span class="pl-s"><span class="pl-pds">'</span>english<span class="pl-pds">'</span></span>))
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removeWords</span>, stopwords(<span class="pl-v">kind</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>SMART<span class="pl-pds">"</span></span>))
-<span class="pl-c">#metaData/recurrent words</span>
-
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">stripWhitespace</span>)
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">removePunctuation</span>)
 <span class="pl-smi">docs</span> <span class="pl-k">&lt;-</span> tm_map(<span class="pl-smi">docs</span>, <span class="pl-smi">PlainTextDocument</span>)</pre></div>
 
-<p>Following this code, the posts now look like the following</p>
+<p>Following this code, the posts now look like the following
+<img src="http://i.imgur.com/dWYC0Wo.png" alt=""></p>
 
 <p>Now that the data has been cleaned, analysis can follow.</p>
 
