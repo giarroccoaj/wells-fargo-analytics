@@ -22,8 +22,6 @@
       <h1>
 <a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction.</h1>
 
-<p>Introduction</p>
-
 <p>Throughout my Data 101 course I was introduced to the concepts and theories behind Data Science that make it such an interdisciplinary field. Using the R programming language and popular algorithms in Big Data I was able to explore real world data and gain practical experience as a Data Scientist. </p>
 
 <p>A recurring theme, or observation, when looking into Big Data is the idea that large data sets are difficult to make sense of (i.e: unstructured). The challenge is often to make sense of (structure) this data. </p>
@@ -32,8 +30,6 @@
 
 <h1>
 <a id="the-competition" class="anchor" href="#the-competition" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Competition.</h1>
-
-<p>The Competition</p>
 
 <p>“Dialogues on social media can provide tremendous insight into the behaviors, desires, pains, and thoughts of consumers. We'd like your help in developing a repeatable process that identifies, classifies, and extracts the underlying drivers of consumer financial conversations and comments in social media data.”</p>
 
@@ -84,28 +80,68 @@ library(<span class="pl-smi">rJava</span>)
 
 <p>Now that the data has been cleaned, analysis can be done.</p>
 
-<p>To find out what topics consumers talked about on social media, we went ahead and found the most frequent terms using 10,000 posts.</p>
+<p>To find out what topics consumers talked about on social media, we went ahead ran sentiment analysis on the newly cleaned data. Using the 10,000 social media posts, we compared them to lists of positive and negative words.</p>
 
-<p>But to do this, the Corpus must first be turned into a Document-Term Matrix</p>
+<p>But to do this, the Corpus must first be turned into a Document-Term Matrix, removed of sparse terms, and turned back into a data frame</p>
 
 <div class="highlight highlight-source-r"><pre><span class="pl-smi">dtm</span> <span class="pl-k">&lt;-</span> DocumentTermMatrix(<span class="pl-smi">docs</span>)
 <span class="pl-v">dtm</span> <span class="pl-k">=</span> removeSparseTerms(<span class="pl-smi">dtm</span>, <span class="pl-c1">0.98</span>) <span class="pl-c">#removes words with very low frequency</span>
-findFreqTerms(<span class="pl-smi">dtm</span>,<span class="pl-c1">100</span>) <span class="pl-c">#finds words that occur at least 100x</span></pre></div>
+<span class="pl-smi">new.df</span> <span class="pl-k">&lt;-</span> <span class="pl-k">data.frame</span>(<span class="pl-v">text</span><span class="pl-k">=</span>unlist(sapply(<span class="pl-smi">docs</span>, `[[`, <span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>)), <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)</pre></div>
 
-<h3>
-<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating pages manually</h3>
+<p>With new.df, we come up with sentiment scores that can be used to make wordclouds and other plots using the following function</p>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">pos</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>positive-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
+<span class="pl-smi">neg</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>negative-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
 
-<h3>
-<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<span class="pl-v">score.sentiment</span> <span class="pl-k">=</span> <span class="pl-k">function</span>(<span class="pl-smi">sentences</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>none<span class="pl-pds">'</span></span>)
+{
+  require(<span class="pl-smi">plyr</span>)
+  require(<span class="pl-smi">stringr</span>)
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor’s GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+  <span class="pl-c"># we got a vector of sentences. plyr will handle a list</span>
+  <span class="pl-c"># or a vector as an "l" for us</span>
+  <span class="pl-c"># we want a simple array ("a") of scores back, so we use </span>
+  <span class="pl-c"># "l" + "a" + "ply" = "laply":</span>
+  <span class="pl-v">scores</span> <span class="pl-k">=</span> laply(<span class="pl-smi">sentences</span>, <span class="pl-k">function</span>(<span class="pl-smi">sentence</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>) {
 
-<h3>
-<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+    <span class="pl-c"># clean up sentences with R's regex-driven global substitute, gsub():</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:punct:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:cntrl:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>d+<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-c"># and convert to lower case:</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> tolower(<span class="pl-smi">sentence</span>)
 
-<p>Having trouble with Pages? Check out our <a href="https://help.github.com/pages">documentation</a> or <a href="https://github.com/contact">contact support</a> and we’ll help you sort it out.</p>
+    <span class="pl-c"># split into words. str_split is in the stringr package</span>
+    <span class="pl-v">word.list</span> <span class="pl-k">=</span> str_split(<span class="pl-smi">sentence</span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>s+<span class="pl-pds">'</span></span>)
+    <span class="pl-c"># sometimes a list() is one level of hierarchy too much</span>
+    <span class="pl-v">words</span> <span class="pl-k">=</span> unlist(<span class="pl-smi">word.list</span>)
+
+    <span class="pl-c"># compare our words to the dictionaries of positive &amp; negative terms</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">pos.words</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">neg.words</span>)
+
+    <span class="pl-c"># match() returns the position of the matched term or NA</span>
+    <span class="pl-c"># we just want a TRUE/FALSE:</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">pos.matches</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">neg.matches</span>)
+
+    <span class="pl-c"># and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():</span>
+    <span class="pl-v">score</span> <span class="pl-k">=</span> sum(<span class="pl-smi">pos.matches</span>) <span class="pl-k">-</span> sum(<span class="pl-smi">neg.matches</span>)
+
+    <span class="pl-k">return</span>(<span class="pl-smi">score</span>)
+  }, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span>.<span class="pl-smi">progress</span> )
+
+  <span class="pl-v">scores.df</span> <span class="pl-k">=</span> <span class="pl-k">data.frame</span>(<span class="pl-v">score</span><span class="pl-k">=</span><span class="pl-smi">scores</span>, <span class="pl-v">text</span><span class="pl-k">=</span><span class="pl-smi">sentences</span>)
+  <span class="pl-k">return</span>(<span class="pl-smi">scores.df</span>)
+}
+
+<span class="pl-v">scores</span> <span class="pl-k">=</span> score.sentiment(<span class="pl-smi">new.df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>, <span class="pl-smi">pos</span>, <span class="pl-smi">neg</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)</pre></div>
+
+<p>Using the value scores we come up with the following positive and negative wordclouds...</p>
+
+<p><img src="http://i.imgur.com/hBcgAz8.png" alt="Positive Sentiment"></p>
+
+<p><a href="http://i.imgur.com/ToEVUrM.png">Negative Sentiment</a></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/giarroccoaj/wells-fargo-analytics">Wells Fargo Analytics Competition</a> is maintained by <a href="https://github.com/giarroccoaj">giarroccoaj</a>.</span>
