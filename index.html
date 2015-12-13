@@ -89,9 +89,26 @@ library(<span class="pl-smi">rJava</span>)
 
 <p>Now that the data has been cleaned, analysis can be done.</p>
 
-<p>To find out what topics consumers talked about on social media, we went ahead ran sentiment analysis on the newly cleaned data. Using the 10,000 social media posts, we compared them to lists of positive and negative words.</p>
+<p>To find out what topics consumers talked about on social media, we went ahead ran sentiment analysis on the newly cleaned data. Using our sample of 10,000 social media posts, we compared them to lists of positive and negative words. We also ran sentiment analysis for each bank talked about in the posts. Here is code to subset each bank into its own corpus.</p>
 
-<p>But to do this, the Corpus must first be turned into a Document-Term Matrix, removed of sparse terms, and turned back into a data frame</p>
+<div class="highlight highlight-source-r"><pre><span class="pl-v">bankA.idx</span> <span class="pl-k">=</span> which(sapply(<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>,<span class="pl-k">function</span>(<span class="pl-smi">x</span>) grepl(<span class="pl-s"><span class="pl-pds">"</span>BankA<span class="pl-pds">"</span></span>,<span class="pl-smi">x</span>))) <span class="pl-c">#searches for posts containg "BankA"</span>
+<span class="pl-v">bankB.idx</span> <span class="pl-k">=</span> which(sapply(<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>,<span class="pl-k">function</span>(<span class="pl-smi">x</span>) grepl(<span class="pl-s"><span class="pl-pds">"</span>BankB<span class="pl-pds">"</span></span>,<span class="pl-smi">x</span>)))
+<span class="pl-v">bankC.idx</span> <span class="pl-k">=</span> which(sapply(<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>,<span class="pl-k">function</span>(<span class="pl-smi">x</span>) grepl(<span class="pl-s"><span class="pl-pds">"</span>BankC<span class="pl-pds">"</span></span>,<span class="pl-smi">x</span>)))
+<span class="pl-v">bankD.idx</span> <span class="pl-k">=</span> which(sapply(<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>,<span class="pl-k">function</span>(<span class="pl-smi">x</span>) grepl(<span class="pl-s"><span class="pl-pds">"</span>BankD<span class="pl-pds">"</span></span>,<span class="pl-smi">x</span>)))
+
+<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-v">BankID</span> <span class="pl-k">=</span> vector(<span class="pl-v">mode</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>numeric<span class="pl-pds">"</span></span>,<span class="pl-v">length</span> <span class="pl-k">=</span> nrow(<span class="pl-smi">df</span>))
+<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">BankID</span>[<span class="pl-smi">bankA.idx</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>BankA<span class="pl-pds">"</span></span> <span class="pl-c">#sets new column in data frame to ID each post mentioning BankA</span>
+<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">BankID</span>[<span class="pl-smi">bankB.idx</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>BankB<span class="pl-pds">"</span></span>
+<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">BankID</span>[<span class="pl-smi">bankC.idx</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>BankC<span class="pl-pds">"</span></span>
+<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">BankID</span>[<span class="pl-smi">bankD.idx</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>BankD<span class="pl-pds">"</span></span>
+
+<span class="pl-v">bankA.docs</span> <span class="pl-k">=</span> <span class="pl-smi">docs</span>[<span class="pl-smi">bankA.idx</span>] <span class="pl-c">#All posts mentioning bankA</span>
+<span class="pl-v">bankB.docs</span> <span class="pl-k">=</span> <span class="pl-smi">docs</span>[<span class="pl-smi">bankB.idx</span>]
+<span class="pl-v">bankC.docs</span> <span class="pl-k">=</span> <span class="pl-smi">docs</span>[<span class="pl-smi">bankC.idx</span>]
+<span class="pl-v">bankD.docs</span> <span class="pl-k">=</span> <span class="pl-smi">docs</span>[<span class="pl-smi">bankD.idx</span>] 
+</pre></div>
+
+<p>For sentiment analysis to work, the Corpus must first be turned into a Document-Term Matrix, removed of its sparse terms, and turned back into a data frame.</p>
 
 <div class="highlight highlight-source-r"><pre><span class="pl-smi">dtm</span> <span class="pl-k">&lt;-</span> DocumentTermMatrix(<span class="pl-smi">docs</span>)
 <span class="pl-v">dtm</span> <span class="pl-k">=</span> removeSparseTerms(<span class="pl-smi">dtm</span>, <span class="pl-c1">0.98</span>) <span class="pl-c">#removes words with very low frequency</span>
@@ -146,7 +163,7 @@ library(<span class="pl-smi">rJava</span>)
 
 <span class="pl-v">scores</span> <span class="pl-k">=</span> score.sentiment(<span class="pl-smi">new.df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>, <span class="pl-smi">pos</span>, <span class="pl-smi">neg</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)</pre></div>
 
-<p>Using the value scores we come up with the following positive and negative wordclouds...</p>
+<p>For the data frame containing 10,000 we came up with the following positive and negative wordclouds...</p>
 
 <p><img src="http://i.imgur.com/hBcgAz8.png" alt="Positive Sentiment"></p>
 
@@ -158,7 +175,7 @@ library(<span class="pl-smi">rJava</span>)
 
 <p>Looking more deeply into the sentiment, the  plot above shows that people are more likely to leave positive posts on Facebook rather than on Twitter. This conclusion could have further implications as to how banks market themselves on each social medium. While Twitter acts as a live feed allowing more real-time reviews, Facebook acts as a page. Therefore, Facebook may have more volunteer bias than Twitter. People may be more inclined to tweet after a bad experience than leave a review.</p>
 
-<p>As for the financial topics being discussed via social media, Bank D’s data was the most helpful providing areas such as “financial management”, “grants”, “advisers” while the remaining banks had more broad terms such as “credit card”. This may due to a policy Bank D has where they encourage their customers to leave specific comments so when doing analysis like this, it is easier to have more solid takeaways.</p>
+<p>As for the financial topics being discussed via social media across individual banks, Bank D’s data was the most helpful providing areas such as “financial management”, “grants”, “advisers” while the remaining banks had more broad terms such as “credit card”. This may due to a policy Bank D has where they encourage their customers to leave specific comments so when doing analysis like this, it is easier to have more solid takeaways.</p>
 
 <p>The bank that stood out as being different in the word clusters was Bank D. While all other banks shared words “like” and “can,” Bank D showed more active words such as “swing,” “apply,” and “program.” Bank D may be more effective on a basic customer service level, therefore prompting tweets only when more complex issues come about. </p>
       </section>
